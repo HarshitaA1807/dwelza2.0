@@ -50,9 +50,13 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    df = load_data("/home/claude/house-price-prediction/data/raw_data.csv")
+    import os
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    DATA_DIR = os.path.join(os.path.dirname(BASE_DIR), "data")
+
+    df = load_data(os.path.join(DATA_DIR, "raw_data.csv"))
     print(f"Loaded {len(df)} rows.")
 
     df_clean = clean_data(df)
-    df_clean.to_csv("/home/claude/house-price-prediction/data/cleaned_data.csv", index=False)
+    df_clean.to_csv(os.path.join(DATA_DIR, "cleaned_data.csv"), index=False)
     print(f"Saved cleaned data: {len(df_clean)} rows.")

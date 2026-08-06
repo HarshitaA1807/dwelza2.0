@@ -9,8 +9,13 @@ Replace this with your REAL dataset (Kaggle / government / scraped data)
 once you have one. This is only to get your pipeline working end-to-end.
 """
 
+import os
 import numpy as np
 import pandas as pd
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(os.path.dirname(BASE_DIR), "data")
+os.makedirs(DATA_DIR, exist_ok=True)
 
 np.random.seed(42)
 
@@ -71,8 +76,8 @@ df = pd.DataFrame(rows, columns=[
     "Num_Amenities", "Furnishing", "Parking", "Price"
 ])
 
-df.to_excel("/home/claude/house-price-prediction/data/raw_data.xlsx", index=False)
-df.to_csv("/home/claude/house-price-prediction/data/raw_data.csv", index=False)
+df.to_excel(os.path.join(DATA_DIR, "raw_data.xlsx"), index=False)
+df.to_csv(os.path.join(DATA_DIR, "raw_data.csv"), index=False)
 
 print(f"Generated {len(df)} rows.")
 print(df.head())

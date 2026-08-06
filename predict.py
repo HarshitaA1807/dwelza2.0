@@ -3,16 +3,45 @@ predict.py
 -----------
 Loads the saved model + encoders and provides a single function,
 predict_price(), that the Streamlit app (or anything else) can call.
+
+Uses paths relative to this file (not hardcoded), and auto-trains
+the model on first run if no saved model is found yet -- this makes
+the app work on Streamlit Cloud without manually uploading .pkl files.
 """
 
+import os
 import numpy as np
 import joblib
 
-MODEL_DIR = "/home/claude/house-price-prediction/models"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))          # .../src
+PROJECT_DIR = os.path.dirname(BASE_DIR)                         # project root
+MODEL_DIR = os.path.join(PROJECT_DIR, "models")
+DATA_DIR = os.path.join(PROJECT_DIR, "data")
 
-_model = joblib.load(f"{MODEL_DIR}/best_model.pkl")
-_encoders = joblib.load(f"{MODEL_DIR}/encoders.pkl")
-_feature_cols = joblib.load(f"{MODEL_DIR}/feature_cols.pkl")
+_model_path = os.path.join(MODEL_DIR, "best_model.pkl")
+
+if not os.path.exists(_model_path):
+    # No trained model found yet (e.g. fresh clone / fresh cloud deploy) ->
+    # generate sample data, clean it, and train automatically.
+    os.makedirs(MODEL_DIR, exist_ok=True)
+    os.makedirs(DATA_DIR, exist_ok=True)
+
+    import generate_sample_data  # noqa: F401  (running this module generates data/raw_data.csv)
+    from data_preprocessing import load_data, clean_data
+    import train_model as _train_model
+
+    raw_path = os.path.join(DATA_DIR, "raw_data.csv")
+    df = load_data(raw_path)
+    df_clean = clean_data(df)
+    df_clean.to_csv(os.path.join(DATA_DIR, "cleaned_data.csv"), index=False)
+
+    _train_model.DATA_PATH = os.path.join(DATA_DIR, "cleaned_data.csv")
+    _train_model.MODEL_DIR = MODEL_DIR
+    _train_model.main()
+
+_model = joblib.load(_model_path)
+_encoders = joblib.load(os.path.join(MODEL_DIR, "encoders.pkl"))
+_feature_cols = joblib.load(os.path.join(MODEL_DIR, "feature_cols.pkl"))
 
 
 def _safe_encode(encoder, value):

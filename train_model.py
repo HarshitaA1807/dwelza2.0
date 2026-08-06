@@ -15,10 +15,13 @@ from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
+import os
 from feature_engineering import engineer_features
 
-DATA_PATH = "/home/claude/house-price-prediction/data/cleaned_data.csv"
-MODEL_DIR = "/home/claude/house-price-prediction/models"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_DIR = os.path.dirname(BASE_DIR)
+DATA_PATH = os.path.join(PROJECT_DIR, "data", "cleaned_data.csv")
+MODEL_DIR = os.path.join(PROJECT_DIR, "models")
 
 FEATURE_COLS = [
     "Area_sqft", "BHK", "Age_years",
@@ -39,6 +42,7 @@ def evaluate(name, model, X_test, y_test):
 
 
 def main():
+    os.makedirs(MODEL_DIR, exist_ok=True)
     df = pd.read_csv(DATA_PATH)
     df_fe, encoders = engineer_features(df)
 
